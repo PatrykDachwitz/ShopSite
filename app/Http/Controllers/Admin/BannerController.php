@@ -1,9 +1,13 @@
 <?php
-
+declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BannerCreate;
+use App\Http\Requests\BannerUpdate;
+use App\Repository\Admin\BannerRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 
 class BannerController extends Controller
 {
@@ -12,9 +16,21 @@ class BannerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    private const STORAGE_PATH = '/app/privateHtml/';
+    private $bannerRepository;
+
+    public function __construct(BannerRepository $bannerRepository) {
+        $this->bannerRepository = $bannerRepository;
+    }
+
     public function index()
     {
-        //
+
+       // dd($this->bannerRepository->getAll());
+        return View('admin.banner.index', [
+            'banners' => $this->bannerRepository->getAll()
+        ]);
     }
 
     /**
@@ -24,7 +40,10 @@ class BannerController extends Controller
      */
     public function create()
     {
-        //
+        return View('admin.banner.create', [
+            'types' => $this->bannerRepository->getTypes(),
+            'actualyDate' => date('Y-m-d')
+        ]);
     }
 
     /**
@@ -33,9 +52,19 @@ class BannerController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(BannerCreate $request)
     {
-        //
+
+        $clearData = $request->validated();
+        try{
+            $nameFile = $this->bannerRepository->create($clearData);
+            file_put_contents(storage_path(self::STORAGE_PATH . $nameFile), "");
+        } catch (Exception) {
+            abort(500);
+        }
+
+        return redirect()
+            ->route('admin.banner.index');
     }
 
     /**
@@ -44,9 +73,23 @@ class BannerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(int $id)
     {
-        //
+
+        $linkCustomFile = storage_path(self::STORAGE_PATH . 'test.html');
+        try {
+            $banner = $this->bannerRepository->find($id);
+            //$availableTypes = $this->bannerRepository->getTypes();
+            if(!file_exists($linkCustomFile)) throw new Exception('file n`t exsist!');
+            else $customHtml = file_get_contents($linkCustomFile);
+        } catch (Exception) {
+            abort(404);
+        }
+        return View('admin.banner.show', [
+            'banner' => $banner,
+            'contents' => $customHtml,
+            //'availableTypes' => $availableTypes
+        ]);
     }
 
     /**
@@ -55,9 +98,24 @@ class BannerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(int $id)
     {
-        //
+
+        $linkCustomFile = storage_path(self::STORAGE_PATH . 'test.html');
+        try {
+            $banner = $this->bannerRepository->find($id);
+            //$availableTypes = $this->bannerRepository->getTypes();
+            if(!file_exists($linkCustomFile)) throw new Exception('file n`t exsist!');
+            else $customHtml = file_get_contents($linkCustomFile);
+        } catch (Exception) {
+            abort(404);
+        }
+
+        return View('admin.banner.edit', [
+            'banner' => $banner,
+            'contents' => $customHtml,
+            'types' => $this->bannerRepository->getTypes()
+        ]);
     }
 
     /**
@@ -67,9 +125,21 @@ class BannerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(BannerUpdate $request, \App\Service\Image\BannerCreate $imageSave)
     {
-        //
+        $images = [];
+        $clearData = $request->validated();
+        if (isset($clearData['file'])) {
+            $images = $imageSave->uploude($clearData['file']);
+        };
+
+        //dd($request->validated());
+
+        $this->bannerRepository->update($clearData, $images);
+        return Redirect()
+            ->route('admin.banner.edit', [
+                'banner' => $clearData['id']
+            ]);
     }
 
     /**

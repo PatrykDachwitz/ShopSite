@@ -70,7 +70,11 @@ return [
     */
 
     'links' => [
-        public_path('storage') => storage_path('app/public'),
+        public_path('avatar') => storage_path('app/public/avatar'),
+        public_path('banner') => storage_path('app/public/banner'),
+        public_path('files') => storage_path('app/public/files'),
+        public_path('icon') => storage_path('app/public/icon'),
+        public_path('image') => storage_path('app/public/image'),
     ],
 
 ];

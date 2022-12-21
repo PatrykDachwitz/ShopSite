@@ -1,0 +1,19 @@
+.item-card {
+  background-color: $main-grey;
+  border: 1px solid $second-grey;
+  display: flex;
+  flex-wrap: nowrap;
+  padding: 15px 5px;
+  align-items: center;
+  justify-content: space-between;
+ &__checbox-title {
+  & .checkbox {
+    width: 20px;
+  }
+ }
+  &__item_group {
+    & a{
+      text-decoration: unset;
+    }
+  }
+}

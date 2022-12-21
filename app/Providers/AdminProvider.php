@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repository\Admin\Eloquent\BannerRepository;
+use App\Repository\Admin\BannerRepository as BannerRepositoryInteface;
 use Illuminate\Support\ServiceProvider;
 
 class AdminProvider extends ServiceProvider
@@ -23,6 +25,9 @@ class AdminProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $this->app->bind(
+            BannerRepositoryInteface::class,
+            BannerRepository::class
+        );
     }
 }

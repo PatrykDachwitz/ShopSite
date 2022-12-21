@@ -16,6 +16,14 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::group([
+    'as' => 'admin.',
+    'prefix' => 'admin'
+], function() {
+    Route::resource('banner', \App\Http\Controllers\Admin\BannerController::class);
+    Route::post('/banner/update', [\App\Http\Controllers\Admin\BannerController::class, 'update'])
+    ->name('banner.update.post');
+});
 
 Auth::routes();
 
